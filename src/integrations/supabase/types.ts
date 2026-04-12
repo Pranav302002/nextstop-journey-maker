@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          from_city: string
+          id: string
+          passengers: number
+          payment_status: string
+          pickup_address: string | null
+          special_requests: string | null
+          status: string
+          to_city: string
+          total_price: number | null
+          travel_date: string
+          travel_time: string | null
+          vehicle_type: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          from_city: string
+          id?: string
+          passengers?: number
+          payment_status?: string
+          pickup_address?: string | null
+          special_requests?: string | null
+          status?: string
+          to_city: string
+          total_price?: number | null
+          travel_date: string
+          travel_time?: string | null
+          vehicle_type: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          from_city?: string
+          id?: string
+          passengers?: number
+          payment_status?: string
+          pickup_address?: string | null
+          special_requests?: string | null
+          status?: string
+          to_city?: string
+          total_price?: number | null
+          travel_date?: string
+          travel_time?: string | null
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
+      routes: {
+        Row: {
+          base_price_sedan: number
+          base_price_suv: number
+          base_price_tempo: number
+          created_at: string
+          distance_km: number
+          from_city: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          to_city: string
+        }
+        Insert: {
+          base_price_sedan: number
+          base_price_suv: number
+          base_price_tempo: number
+          created_at?: string
+          distance_km: number
+          from_city: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          to_city: string
+        }
+        Update: {
+          base_price_sedan?: number
+          base_price_suv?: number
+          base_price_tempo?: number
+          created_at?: string
+          distance_km?: number
+          from_city?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          to_city?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
