@@ -2,12 +2,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import HeroSection from "@/components/home/HeroSection";
-import QuickBookingWidget from "@/components/home/QuickBookingWidget";
+import HowItWorks from "@/components/home/HowItWorks";
 import PackagesGrid from "@/components/home/PackagesGrid";
 import VehicleFleet from "@/components/home/VehicleFleet";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
-import ServicesHighlight from "@/components/home/ServicesHighlight";
 import StatsCounters from "@/components/home/StatsCounters";
+import ServicesHighlight from "@/components/home/ServicesHighlight";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import FAQSection from "@/components/home/FAQSection";
 import CTABanner from "@/components/home/CTABanner";
@@ -17,7 +17,7 @@ const Index = () => (
     <Header />
     <main>
       <HeroSection />
-      <QuickBookingWidget />
+      <HowItWorks />
       <PackagesGrid limit={4} />
       <VehicleFleet />
       <WhyChooseUs />
