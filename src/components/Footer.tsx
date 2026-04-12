@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
-import { PHONE, PHONE_LINK, WHATSAPP_LINK } from "@/lib/constants";
 import logo from "@/assets/logo.jfif";
 
 const Footer = () => (
@@ -13,10 +12,10 @@ const Footer = () => (
             Your trusted travel partner for comfortable rides, memorable experiences, and hassle-free bookings across Maharashtra and beyond.
           </p>
           <div className="flex gap-3 mt-4">
-            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="bg-primary-foreground/10 hover:bg-primary-foreground/20 p-2.5 rounded-lg transition-colors">
+            <a href="https://wa.me/919822995657" target="_blank" rel="noopener noreferrer" className="bg-primary-foreground/10 hover:bg-primary-foreground/20 p-2.5 rounded-lg transition-colors">
               <MessageCircle className="w-5 h-5" />
             </a>
-            <a href={PHONE_LINK} className="bg-primary-foreground/10 hover:bg-primary-foreground/20 p-2.5 rounded-lg transition-colors">
+            <a href="tel:+919822995657" className="bg-primary-foreground/10 hover:bg-primary-foreground/20 p-2.5 rounded-lg transition-colors">
               <Phone className="w-5 h-5" />
             </a>
           </div>
@@ -25,7 +24,7 @@ const Footer = () => (
         <div>
           <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
           <nav className="flex flex-col gap-2">
-            {[["Home", "/"], ["About Us", "/about"], ["Tour Packages", "/packages"], ["Vehicles", "/vehicles"], ["Book Now", "/booking"], ["Contact", "/contact"]].map(([label, to]) => (
+            {[["Home", "/"], ["Tour Packages", "/packages"], ["Book Now", "/booking"], ["Contact", "/contact"]].map(([label, to]) => (
               <Link key={to} to={to} className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">{label}</Link>
             ))}
           </nav>
@@ -43,29 +42,32 @@ const Footer = () => (
         <div>
           <h4 className="font-semibold text-lg mb-4">Contact Us</h4>
           <div className="flex flex-col gap-3 text-sm text-primary-foreground/80">
-            <a href={PHONE_LINK} className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
-              <Phone className="w-4 h-4 shrink-0" />
-              {PHONE}
-            </a>
-            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
+            <a href="https://wa.me/919822995657" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
               <MessageCircle className="w-4 h-4 shrink-0" />
-              WhatsApp Us
+              +91 98229 95657 (WhatsApp)
+            </a>
+            <a href="tel:+918888192806" className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
+              <Phone className="w-4 h-4 shrink-0" />
+              +91 88881 92806
             </a>
             <div className="flex items-start gap-2">
               <Mail className="w-4 h-4 shrink-0 mt-0.5" />
-              info@nextstoptours.com
+              info@nextstoptours.in
             </div>
             <div className="flex items-start gap-2">
               <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
               Pune, Maharashtra, India
             </div>
           </div>
+          <a href="https://wa.me/919822995657" target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 bg-[#25D366] text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#20BD5A] transition-colors">
+            <MessageCircle className="w-4 h-4" /> WhatsApp Us
+          </a>
         </div>
       </div>
     </div>
     <div className="border-t border-primary-foreground/10 py-4">
       <p className="text-center text-sm text-primary-foreground/50">
-        © {new Date().getFullYear()} NextStop Tours and Travels. All rights reserved.
+        © 2025 NextStop Tours and Travels. All rights reserved.
       </p>
     </div>
   </footer>

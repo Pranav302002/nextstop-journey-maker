@@ -1,6 +1,7 @@
-export const PHONE = "8888192806";
+export const PHONE = "9822995657";
+export const PHONE2 = "8888192806";
 export const WHATSAPP_LINK = `https://wa.me/91${PHONE}`;
-export const PHONE_LINK = `tel:${PHONE}`;
+export const PHONE_LINK = `tel:+91${PHONE}`;
 export const WHATSAPP_PREFILLED = (msg: string) =>
   `https://wa.me/91${PHONE}?text=${encodeURIComponent(msg)}`;
 
@@ -13,15 +14,21 @@ Travel Date:
 Vehicle Type:
 Passengers:`;
 
+export const CITIES = [
+  "Pune", "Mumbai", "Nashik", "Shirdi", "Mahabaleshwar",
+  "Lonavala", "Goa", "Aurangabad", "Hyderabad",
+];
+
+export const VEHICLE_OPTIONS = [
+  { type: "Sedan", rate: 12, seats: 4, features: "AC, Comfortable", icon: "🚗" },
+  { type: "SUV", rate: 16, seats: 6, features: "AC, Spacious", icon: "🚙" },
+  { type: "Tempo Traveller", rate: 22, seats: 12, features: "AC, Groups", icon: "🚐" },
+];
+
 export const VEHICLE_RATES: Record<string, { seats: string; rate: number; features: string }> = {
   "Sedan": { seats: "4 Seater", rate: 12, features: "AC, Comfortable, Fuel Efficient" },
-  "SUV": { seats: "6-7 Seater", rate: 14, features: "Spacious, AC, Luggage Space" },
-  "Ertiga": { seats: "6 Seater", rate: 14, features: "Compact SUV, AC, Family Friendly" },
-  "Innova": { seats: "7 Seater", rate: 16, features: "Premium MPV, AC, Captain Seats" },
-  "Innova Crysta": { seats: "7 Seater", rate: 19, features: "Premium Comfort, AC, Leather Seats" },
-  "Innova Hycross": { seats: "7 Seater", rate: 26, features: "Hybrid, Premium, Automatic" },
-  "Tempo Traveller": { seats: "12-17 Seater", rate: 32, features: "Group Travel, AC, Pushback Seats" },
-  "Urbania": { seats: "12-17 Seater", rate: 35, features: "Luxury Bus, AC, Premium Interiors" },
+  "SUV": { seats: "6-7 Seater", rate: 16, features: "Spacious, AC, Luggage Space" },
+  "Tempo Traveller": { seats: "12 Seater", rate: 22, features: "Group Travel, AC, Pushback Seats" },
 };
 
 export const TOUR_PACKAGES = [
