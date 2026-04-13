@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import SectionHeading from "@/components/SectionHeading";
-import { PHONE, PHONE_LINK, WHATSAPP_LINK } from "@/lib/constants";
+import { PHONE, PHONE2, PHONE_LINK, PHONE2_LINK, EMAIL, WHATSAPP_PREFILLED, DEFAULT_WHATSAPP_MSG, LOCATION } from "@/lib/constants";
 
 const Contact = () => {
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
@@ -50,26 +50,30 @@ const Contact = () => {
                 <div className="space-y-4">
                   <a href={PHONE_LINK} className="flex items-center gap-3 text-foreground hover:text-secondary transition-colors">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center"><Phone className="w-5 h-5 text-primary" /></div>
-                    <div><p className="text-sm text-muted-foreground">Call Us</p><p className="font-medium">{PHONE}</p></div>
+                    <div><p className="text-sm text-muted-foreground">Primary</p><p className="font-medium">+91 {PHONE.replace(/(\d{5})(\d{5})/, "$1 $2")}</p></div>
                   </a>
-                  <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-foreground hover:text-secondary transition-colors">
+                  <a href={PHONE2_LINK} className="flex items-center gap-3 text-foreground hover:text-secondary transition-colors">
+                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center"><Phone className="w-5 h-5 text-primary" /></div>
+                    <div><p className="text-sm text-muted-foreground">Secondary</p><p className="font-medium">+91 {PHONE2.replace(/(\d{5})(\d{5})/, "$1 $2")}</p></div>
+                  </a>
+                  <a href={WHATSAPP_PREFILLED(DEFAULT_WHATSAPP_MSG)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-foreground hover:text-secondary transition-colors">
                     <div className="w-10 h-10 bg-[#25D366]/10 rounded-lg flex items-center justify-center"><MessageCircle className="w-5 h-5 text-[#25D366]" /></div>
                     <div><p className="text-sm text-muted-foreground">WhatsApp</p><p className="font-medium">Chat with us</p></div>
                   </a>
-                  <div className="flex items-center gap-3">
+                  <a href={`mailto:${EMAIL}`} className="flex items-center gap-3 text-foreground hover:text-secondary transition-colors">
                     <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center"><Mail className="w-5 h-5 text-accent" /></div>
-                    <div><p className="text-sm text-muted-foreground">Email</p><p className="font-medium text-foreground">info@nextstoptours.com</p></div>
-                  </div>
+                    <div><p className="text-sm text-muted-foreground">Email</p><p className="font-medium text-foreground">{EMAIL}</p></div>
+                  </a>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center"><MapPin className="w-5 h-5 text-secondary" /></div>
-                    <div><p className="text-sm text-muted-foreground">Address</p><p className="font-medium text-foreground">Pune, Maharashtra, India</p></div>
+                    <div><p className="text-sm text-muted-foreground">Address</p><p className="font-medium text-foreground">{LOCATION}</p></div>
                   </div>
                 </div>
               </div>
 
               <div className="bg-card rounded-2xl overflow-hidden shadow-card h-64">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d242117.68071658027!2d73.72287834025892!3d18.524564857498674!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2bf2e67461101%3A0x828d43bf9d9ee343!2sPune%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d120617.74578901057!2d75.24165825!3d19.8761653!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bdb98f0a8e3cb57%3A0x5e7b7d2f90cd47d1!2sChhatrapati%20Sambhajinagar%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1699000000000"
                   width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" title="Location Map"
                 />
               </div>
