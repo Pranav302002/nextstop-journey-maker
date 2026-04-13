@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Phone, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.jfif";
-import { PHONE_LINK, WHATSAPP_LINK } from "@/lib/constants";
+import { PHONE_LINK, WHATSAPP_PREFILLED, DEFAULT_WHATSAPP_MSG } from "@/lib/constants";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -42,7 +42,7 @@ const Header = () => {
         </nav>
 
         <div className="hidden lg:flex items-center gap-2">
-          <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-[#25D366] text-card px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm">
+          <a href={WHATSAPP_PREFILLED(DEFAULT_WHATSAPP_MSG)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-[#25D366] text-card px-4 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm">
             <MessageCircle className="w-4 h-4" /> WhatsApp
           </a>
           <Link to="/booking" className="flex items-center gap-2 bg-accent text-accent-foreground px-5 py-2.5 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity shadow-sm shadow-accent/20">

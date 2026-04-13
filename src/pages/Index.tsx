@@ -11,6 +11,8 @@ import ServicesHighlight from "@/components/home/ServicesHighlight";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import FAQSection from "@/components/home/FAQSection";
 import CTABanner from "@/components/home/CTABanner";
+import PricingSection from "@/components/home/PricingSection";
+import GoogleMap from "@/components/home/GoogleMap";
 
 const Index = () => (
   <>
@@ -18,12 +20,14 @@ const Index = () => (
     <main>
       <HeroSection />
       <HowItWorks />
-      <PackagesGrid limit={4} />
+      <ServicesHighlight />
+      <PricingSection />
+      <PackagesGrid limit={6} />
       <VehicleFleet />
       <WhyChooseUs />
       <StatsCounters />
-      <ServicesHighlight />
       <TestimonialsSection />
+      <GoogleMap />
       <FAQSection />
       <CTABanner />
     </main>

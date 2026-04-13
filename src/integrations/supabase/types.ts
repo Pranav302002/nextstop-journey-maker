@@ -16,100 +16,199 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
+          base_fare: number | null
+          billable_distance: number | null
+          booking_ref: string | null
           created_at: string
           customer_email: string | null
           customer_name: string
           customer_phone: string
-          from_city: string
+          destination: string
+          driver_allowance: number | null
+          estimated_distance: number | null
           id: string
+          number_of_days: number
           passengers: number
           payment_status: string
-          pickup_address: string | null
+          pickup_location: string
+          pickup_time: string
+          price_per_km: number | null
+          return_date: string | null
+          source: string | null
           special_requests: string | null
           status: string
-          to_city: string
+          toll_parking_note: string | null
           total_price: number | null
+          tour_package: string | null
           travel_date: string
-          travel_time: string | null
+          trip_type: string | null
           vehicle_type: string
         }
         Insert: {
+          base_fare?: number | null
+          billable_distance?: number | null
+          booking_ref?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name: string
           customer_phone: string
-          from_city: string
+          destination: string
+          driver_allowance?: number | null
+          estimated_distance?: number | null
           id?: string
-          passengers?: number
+          number_of_days?: number
+          passengers: number
           payment_status?: string
-          pickup_address?: string | null
+          pickup_location: string
+          pickup_time: string
+          price_per_km?: number | null
+          return_date?: string | null
+          source?: string | null
           special_requests?: string | null
           status?: string
-          to_city: string
+          toll_parking_note?: string | null
           total_price?: number | null
+          tour_package?: string | null
           travel_date: string
-          travel_time?: string | null
+          trip_type?: string | null
           vehicle_type: string
         }
         Update: {
+          base_fare?: number | null
+          billable_distance?: number | null
+          booking_ref?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string
           customer_phone?: string
-          from_city?: string
+          destination?: string
+          driver_allowance?: number | null
+          estimated_distance?: number | null
           id?: string
+          number_of_days?: number
           passengers?: number
           payment_status?: string
-          pickup_address?: string | null
+          pickup_location?: string
+          pickup_time?: string
+          price_per_km?: number | null
+          return_date?: string | null
+          source?: string | null
           special_requests?: string | null
           status?: string
-          to_city?: string
+          toll_parking_note?: string | null
           total_price?: number | null
+          tour_package?: string | null
           travel_date?: string
-          travel_time?: string | null
+          trip_type?: string | null
           vehicle_type?: string
         }
         Relationships: []
       }
       routes: {
         Row: {
-          base_price_sedan: number
-          base_price_suv: number
-          base_price_tempo: number
           created_at: string
+          description: string | null
           distance_km: number
           from_city: string
+          highlights: string | null
           id: string
           image_url: string | null
           is_active: boolean
           name: string
+          number_of_days: number
           to_city: string
+          trip_type: string
         }
         Insert: {
-          base_price_sedan: number
-          base_price_suv: number
-          base_price_tempo: number
           created_at?: string
+          description?: string | null
           distance_km: number
           from_city: string
+          highlights?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           name: string
+          number_of_days?: number
           to_city: string
+          trip_type?: string
         }
         Update: {
-          base_price_sedan?: number
-          base_price_suv?: number
-          base_price_tempo?: number
           created_at?: string
+          description?: string | null
           distance_km?: number
           from_city?: string
+          highlights?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           name?: string
+          number_of_days?: number
           to_city?: string
+          trip_type?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          customer_name: string
+          id: string
+          is_active: boolean
+          location: string | null
+          rating: number
+          review: string
+          trip: string | null
+        }
+        Insert: {
+          customer_name: string
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          rating?: number
+          review: string
+          trip?: string | null
+        }
+        Update: {
+          customer_name?: string
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          rating?: number
+          review?: string
+          trip?: string | null
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          id: string
+          image_url: string | null
+          is_ac: boolean
+          is_active: boolean
+          model_examples: string | null
+          name: string
+          price_per_km: number
+          seats: number
+        }
+        Insert: {
+          id?: string
+          image_url?: string | null
+          is_ac?: boolean
+          is_active?: boolean
+          model_examples?: string | null
+          name: string
+          price_per_km: number
+          seats: number
+        }
+        Update: {
+          id?: string
+          image_url?: string | null
+          is_ac?: boolean
+          is_active?: boolean
+          model_examples?: string | null
+          name?: string
+          price_per_km?: number
+          seats?: number
         }
         Relationships: []
       }

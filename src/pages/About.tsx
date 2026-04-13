@@ -8,7 +8,7 @@ import SectionHeading from "@/components/SectionHeading";
 const values = [
   { icon: Shield, title: "Safety First", desc: "Verified drivers, maintained vehicles, and sanitized interiors for every trip." },
   { icon: Heart, title: "Customer Comfort", desc: "We prioritize your comfort with AC vehicles, clean interiors, and courteous service." },
-  { icon: BadgeDollarSign, title: "Affordable Rates", desc: "Transparent pricing with no hidden charges — value for every rupee." },
+  { icon: BadgeDollarSign, title: "Affordable Rates", desc: "Transparent per-km pricing with no hidden charges — value for every rupee." },
   { icon: Clock, title: "Punctuality", desc: "We respect your time with on-time pickups and reliable schedules." },
 ];
 
@@ -18,11 +18,11 @@ const About = () => (
     <main className="pt-20 md:pt-24">
       <section className="py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <SectionHeading title="About NextStop Tours & Travels" subtitle="Your trusted travel partner across Maharashtra and beyond." />
+          <SectionHeading title="About NextStop Tours & Travels" subtitle="Your trusted travel partner from Chhatrapati Sambhajinagar." />
           <div className="max-w-3xl mx-auto space-y-6 text-muted-foreground leading-relaxed">
-            <p>Welcome to <strong className="text-foreground">NextStop Tours and Travels</strong> — Pune's growing and trusted travel service provider. We specialize in cab booking, outstation travel, airport transfers, religious tours, and customized group travel solutions.</p>
-            <p>Founded with a passion for making travel accessible, comfortable, and affordable for every Indian family, we have served thousands of happy customers across Maharashtra. Whether it's a quick airport transfer or a week-long pilgrimage, we bring the same level of dedication and professionalism to every trip.</p>
-            <p>Our well-maintained fleet includes everything from economical sedans to luxury Urbania coaches — ensuring the right vehicle for every occasion and budget.</p>
+            <p>Welcome to <strong className="text-foreground">NextStop Tours and Travels</strong> — Chhatrapati Sambhajinagar's growing and trusted travel service provider. We specialize in cab booking, heritage tours to Ajanta & Ellora, outstation travel, airport transfers, religious pilgrimages, and customized group travel solutions.</p>
+            <p>Based in the historic city of Chhatrapati Sambhajinagar (Aurangabad), we are ideally positioned to serve travellers exploring Maharashtra's rich heritage, spiritual sites, and scenic destinations. From the magnificent Ajanta & Ellora caves to Jyotirlinga pilgrimages, we bring the same level of dedication and professionalism to every trip.</p>
+            <p>Our well-maintained fleet includes everything from economical sedans to luxury Force Urbania coaches — ensuring the right vehicle for every occasion and budget.</p>
           </div>
         </div>
       </section>
@@ -35,7 +35,7 @@ const About = () => (
                 <Target className="w-7 h-7 text-primary" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">Our Mission</h3>
-              <p className="text-muted-foreground leading-relaxed">To provide safe, comfortable, and affordable travel experiences that create lasting memories for every traveller.</p>
+              <p className="text-muted-foreground leading-relaxed">To provide safe, comfortable, and affordable travel experiences that create lasting memories for every traveller visiting Chhatrapati Sambhajinagar and beyond.</p>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="bg-card rounded-2xl p-8 shadow-card">
               <div className="w-14 h-14 bg-secondary/10 rounded-xl flex items-center justify-center mb-4">

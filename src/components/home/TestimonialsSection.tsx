@@ -1,18 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import SectionHeading from "@/components/SectionHeading";
-
-const testimonials = [
-  { name: "Rajesh Patil", location: "Pune", rating: 5, review: "Amazing service from NextStop! The driver was very professional and the vehicle was spotless. Will definitely book again for our family trips." },
-  { name: "Sneha Kulkarni", location: "Mumbai", rating: 5, review: "Booked a Shirdi trip for my parents. Everything was perfectly arranged — pickup on time, comfortable Innova, and very polite driver." },
-  { name: "Amit Deshmukh", location: "Pune", rating: 5, review: "Best cab service in Pune! We used NextStop for our corporate event and everything went smoothly. Highly recommended." },
-  { name: "Priya Joshi", location: "Nashik", rating: 4, review: "Lonavala weekend getaway was fantastic. The booking process was easy and the vehicle was very clean. Great value for money." },
-  { name: "Vikram Sharma", location: "Pune", rating: 5, review: "I regularly use NextStop for airport pickups. Never been late, always clean cars, and very reasonable rates. Excellent service!" },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const TestimonialsSection = () => {
+  const [testimonials, setTestimonials] = useState<any[]>([]);
   const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    supabase.from("testimonials").select("*").eq("is_active", true).then(({ data }) => {
+      if (data && data.length > 0) setTestimonials(data);
+    });
+  }, []);
+
+  if (testimonials.length === 0) return null;
+
   const prev = () => setCurrent((c) => (c === 0 ? testimonials.length - 1 : c - 1));
   const next = () => setCurrent((c) => (c === testimonials.length - 1 ? 0 : c + 1));
 
@@ -40,8 +43,9 @@ const TestimonialsSection = () => {
                 ))}
               </div>
               <div className="mt-4">
-                <p className="text-foreground font-bold text-lg">{testimonials[current].name}</p>
+                <p className="text-foreground font-bold text-lg">{testimonials[current].customer_name}</p>
                 <p className="text-muted-foreground text-sm">{testimonials[current].location}</p>
+                {testimonials[current].trip && <p className="text-accent text-xs font-medium mt-1">{testimonials[current].trip}</p>}
               </div>
             </motion.div>
           </AnimatePresence>

@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Phone, Mail, MapPin, Calendar, Clock, Users, Car, Send, CheckCircle, ArrowLeft, ArrowRight, Sparkles, MessageCircle } from "lucide-react";
+import { User, Phone, Mail, MapPin, Calendar, Clock, Users, Car, CheckCircle, ArrowLeft, ArrowRight, Sparkles, MessageCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import SectionHeading from "@/components/SectionHeading";
-import { CITIES, VEHICLE_OPTIONS } from "@/lib/constants";
+import { calcFare, PRICING_NOTE, PHONE, PHONE_LINK } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
 
 const STEPS = ["Trip Details", "Personal Details", "Confirmation"];
@@ -15,72 +15,86 @@ const Booking = () => {
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [bookingId, setBookingId] = useState("");
+  const [bookingRef, setBookingRef] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Data from Supabase
+  const [routes, setRoutes] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
+
   // Step 1
-  const [fromCity, setFromCity] = useState("");
-  const [toCity, setToCity] = useState("");
+  const [tripType, setTripType] = useState("one_way");
+  const [pickup, setPickup] = useState("Chhatrapati Sambhajinagar");
+  const [destination, setDestination] = useState("");
   const [travelDate, setTravelDate] = useState("");
-  const [travelTime, setTravelTime] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+  const [pickupTime, setPickupTime] = useState("");
+  const [numDays, setNumDays] = useState(1);
   const [passengers, setPassengers] = useState(1);
   const [vehicleType, setVehicleType] = useState("");
+  const [tourPackage, setTourPackage] = useState("");
+  const [estimatedDistance, setEstimatedDistance] = useState(0);
+  const [specialRequests, setSpecialRequests] = useState("");
 
   // Step 2
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [pickupAddress, setPickupAddress] = useState("");
-  const [specialRequests, setSpecialRequests] = useState("");
 
-  // Routes from Supabase
-  const [routes, setRoutes] = useState<any[]>([]);
+  const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
-    supabase.from("routes").select("*").eq("is_active", true).then(({ data }) => {
-      if (data) setRoutes(data);
-    });
+    supabase.from("routes").select("*").eq("is_active", true).order("distance_km").then(({ data }) => { if (data) setRoutes(data); });
+    supabase.from("vehicles").select("*").eq("is_active", true).order("price_per_km").then(({ data }) => { if (data) setVehicles(data); });
   }, []);
 
   useEffect(() => {
-    const f = searchParams.get("from") || searchParams.get("pickup") || "";
-    const t = searchParams.get("to") || searchParams.get("destination") || "";
-    const d = searchParams.get("date") || "";
-    if (f) setFromCity(f);
-    if (t) setToCity(t);
-    if (d) setTravelDate(d);
+    const p = searchParams.get("pickup") || searchParams.get("from");
+    const d = searchParams.get("destination") || searchParams.get("to");
+    const dt = searchParams.get("date");
+    const v = searchParams.get("vehicle");
+    const ps = searchParams.get("passengers");
+    const dy = searchParams.get("days");
+    if (p) setPickup(p);
+    if (d) setDestination(d);
+    if (dt) setTravelDate(dt);
+    if (v) setVehicleType(v);
+    if (ps) setPassengers(Number(ps));
+    if (dy) setNumDays(Number(dy));
   }, [searchParams]);
 
-  const matchedRoute = useMemo(() => {
-    if (!fromCity || !toCity) return null;
-    return routes.find(r =>
-      r.from_city.toLowerCase() === fromCity.toLowerCase() &&
-      r.to_city.toLowerCase() === toCity.toLowerCase()
-    ) || routes.find(r =>
-      r.to_city.toLowerCase() === fromCity.toLowerCase() &&
-      r.from_city.toLowerCase() === toCity.toLowerCase()
-    );
-  }, [fromCity, toCity, routes]);
+  // Auto-fill distance from route
+  useEffect(() => {
+    if (!destination) return;
+    const route = routes.find(r => r.to_city === destination || r.name === destination);
+    if (route) {
+      setEstimatedDistance(route.distance_km);
+      if (route.number_of_days > 1) setNumDays(route.number_of_days);
+      if (route.trip_type === "package") {
+        setTripType("package_tour");
+        setTourPackage(route.name);
+      }
+    }
+  }, [destination, routes]);
 
-  const estimatedFare = useMemo(() => {
-    if (!matchedRoute || !vehicleType) return 0;
-    const v = VEHICLE_OPTIONS.find(o => o.type === vehicleType);
-    if (!v) return 0;
-    return matchedRoute.distance_km * v.rate;
-  }, [matchedRoute, vehicleType]);
+  const selectedVehicle = vehicles.find(v => v.name === vehicleType);
+  const isLocal = destination === "Local" || tripType === "package_tour";
+  const effectiveDistance = tripType === "round_trip" ? estimatedDistance * 2 : estimatedDistance;
 
-  const distanceKm = matchedRoute?.distance_km || 0;
-
-  const today = new Date().toISOString().split("T")[0];
+  const fareCalc = useMemo(() => {
+    if (!selectedVehicle || estimatedDistance <= 0) return null;
+    return calcFare(effectiveDistance, numDays, Number(selectedVehicle.price_per_km), isLocal);
+  }, [selectedVehicle, effectiveDistance, numDays, isLocal]);
 
   const clearError = (key: string) => setErrors(e => ({ ...e, [key]: "" }));
 
   const validateStep1 = () => {
     const e: Record<string, string> = {};
-    if (!fromCity) e.fromCity = "Select pickup city";
-    if (!toCity) e.toCity = "Select destination";
-    if (fromCity && toCity && fromCity === toCity) e.toCity = "Destination must differ from pickup";
+    if (!pickup.trim()) e.pickup = "Pickup location required";
+    if (!destination) e.destination = "Select destination";
     if (!travelDate) e.travelDate = "Select travel date";
+    if (!pickupTime) e.pickupTime = "Select pickup time";
     if (!vehicleType) e.vehicleType = "Select a vehicle";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -90,7 +104,6 @@ const Booking = () => {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = "Full name required";
     if (!phone.trim() || !/^\d{10}$/.test(phone)) e.phone = "Valid 10-digit phone required";
-    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) e.email = "Valid email required";
     if (!pickupAddress.trim()) e.pickupAddress = "Pickup address required";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -107,25 +120,42 @@ const Booking = () => {
     if (!validateStep2()) return;
     setLoading(true);
     try {
+      const ref = `NS${Date.now().toString(36).toUpperCase()}`;
+      const billableDistance = fareCalc?.billableDistance || 0;
+      const baseFare = fareCalc?.baseFare || 0;
+      const driverAllowance = fareCalc?.driverAllowance || 0;
+      const totalPrice = fareCalc?.totalPrice || 0;
+
       const { data, error } = await supabase.from("bookings").insert({
+        booking_ref: ref,
         customer_name: name.trim(),
         customer_phone: phone.trim(),
-        customer_email: email.trim(),
-        from_city: fromCity,
-        to_city: toCity,
+        customer_email: email.trim() || null,
+        pickup_location: pickup.trim(),
+        destination: destination,
         travel_date: travelDate,
-        travel_time: travelTime || null,
+        return_date: tripType === "round_trip" ? returnDate || null : null,
+        pickup_time: pickupTime,
+        number_of_days: numDays,
         passengers,
         vehicle_type: vehicleType,
-        pickup_address: pickupAddress.trim(),
+        price_per_km: selectedVehicle ? Number(selectedVehicle.price_per_km) : null,
+        trip_type: tripType,
+        tour_package: tourPackage || null,
+        estimated_distance: estimatedDistance,
+        billable_distance: billableDistance,
+        base_fare: baseFare,
+        driver_allowance: driverAllowance,
+        toll_parking_note: "Extra at actuals",
+        total_price: totalPrice,
         special_requests: specialRequests.trim() || null,
-        total_price: estimatedFare || null,
         status: "pending",
         payment_status: "unpaid",
-      }).select("id").single();
+        source: "website",
+      }).select("booking_ref").single();
 
       if (error) throw error;
-      setBookingId(data.id.substring(0, 8).toUpperCase());
+      setBookingRef(data.booking_ref || ref);
       setStep(2);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
@@ -136,11 +166,13 @@ const Booking = () => {
     }
   };
 
-  const whatsappMsg = `Hi! My booking ID is ${bookingId}. I just booked ${fromCity} to ${toCity} on ${travelDate}`;
-  const whatsappUrl = `https://wa.me/919822995657?text=${encodeURIComponent(whatsappMsg)}`;
+  const whatsappMsg = `Hello NextStop! Booking #${bookingRef} confirmed. Trip: ${pickup} to ${destination} on ${travelDate}. Vehicle: ${vehicleType}. Passengers: ${passengers}. Estimated Fare: ₹${fareCalc?.totalPrice?.toLocaleString() || "—"} + toll & parking extra.`;
+  const whatsappUrl = `https://wa.me/91${PHONE}?text=${encodeURIComponent(whatsappMsg)}`;
 
   const inputClass = "w-full px-4 py-3 border-2 border-border rounded-xl text-sm bg-background focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/20 transition-all";
   const selectClass = `${inputClass} appearance-none cursor-pointer`;
+
+  const destinations = [...new Set(routes.map(r => r.to_city))];
 
   return (
     <>
@@ -167,105 +199,163 @@ const Booking = () => {
             </div>
           </div>
 
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <AnimatePresence mode="wait">
-              {/* STEP 1: Trip Details */}
+              {/* STEP 1 */}
               {step === 0 && (
-                <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="bg-card rounded-3xl p-6 md:p-10 shadow-elevated space-y-6">
-                  <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Trip Details</h3>
+                <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                  <div className="lg:col-span-3 bg-card rounded-3xl p-6 md:p-10 shadow-elevated space-y-5">
+                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Trip Details</h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* Trip Type */}
                     <div>
-                      <label className="text-sm font-semibold mb-2 block">From City <span className="text-destructive">*</span></label>
-                      <select value={fromCity} onChange={e => { setFromCity(e.target.value); clearError("fromCity"); }} className={selectClass}>
-                        <option value="">Select pickup city</option>
-                        {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                      {errors.fromCity && <p className="text-destructive text-xs mt-1">{errors.fromCity}</p>}
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold mb-2 block">To City <span className="text-destructive">*</span></label>
-                      <select value={toCity} onChange={e => { setToCity(e.target.value); clearError("toCity"); }} className={selectClass}>
-                        <option value="">Select destination</option>
-                        {CITIES.filter(c => c !== fromCity).map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                      {errors.toCity && <p className="text-destructive text-xs mt-1">{errors.toCity}</p>}
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold mb-2 block">Travel Date <span className="text-destructive">*</span></label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input type="date" min={today} value={travelDate} onChange={e => { setTravelDate(e.target.value); clearError("travelDate"); }} className={`${inputClass} pl-11`} />
-                      </div>
-                      {errors.travelDate && <p className="text-destructive text-xs mt-1">{errors.travelDate}</p>}
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold mb-2 block">Travel Time</label>
-                      <div className="relative">
-                        <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input type="time" value={travelTime} onChange={e => setTravelTime(e.target.value)} className={`${inputClass} pl-11`} />
+                      <label className="text-sm font-semibold mb-2 block">Trip Type</label>
+                      <div className="flex gap-2">
+                        {[["one_way", "One Way"], ["round_trip", "Round Trip"], ["package_tour", "Package Tour"]].map(([val, label]) => (
+                          <button key={val} type="button" onClick={() => setTripType(val)} className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-all ${tripType === val ? "border-secondary bg-secondary/5 text-secondary" : "border-border text-muted-foreground"}`}>
+                            {label}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="text-sm font-semibold mb-2 block">Passengers</label>
-                    <div className="flex items-center gap-3">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      <input type="range" min={1} max={12} value={passengers} onChange={e => setPassengers(Number(e.target.value))} className="flex-1 accent-secondary" />
-                      <span className="font-bold text-secondary w-8 text-center">{passengers}</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="text-sm font-semibold mb-2 block">Pickup Location <span className="text-destructive">*</span></label>
+                        <input value={pickup} onChange={e => { setPickup(e.target.value); clearError("pickup"); }} className={inputClass} placeholder="Chhatrapati Sambhajinagar" />
+                        {errors.pickup && <p className="text-destructive text-xs mt-1">{errors.pickup}</p>}
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold mb-2 block">Destination <span className="text-destructive">*</span></label>
+                        <select value={destination} onChange={e => { setDestination(e.target.value); clearError("destination"); }} className={selectClass}>
+                          <option value="">Select destination</option>
+                          {destinations.map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                        {errors.destination && <p className="text-destructive text-xs mt-1">{errors.destination}</p>}
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold mb-2 block">Travel Date <span className="text-destructive">*</span></label>
+                        <div className="relative">
+                          <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <input type="date" min={today} value={travelDate} onChange={e => { setTravelDate(e.target.value); clearError("travelDate"); }} className={`${inputClass} pl-11`} />
+                        </div>
+                        {errors.travelDate && <p className="text-destructive text-xs mt-1">{errors.travelDate}</p>}
+                      </div>
+                      {tripType === "round_trip" && (
+                        <div>
+                          <label className="text-sm font-semibold mb-2 block">Return Date</label>
+                          <input type="date" min={travelDate || today} value={returnDate} onChange={e => setReturnDate(e.target.value)} className={inputClass} />
+                        </div>
+                      )}
+                      <div>
+                        <label className="text-sm font-semibold mb-2 block">Pickup Time <span className="text-destructive">*</span></label>
+                        <div className="relative">
+                          <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <input type="time" value={pickupTime} onChange={e => { setPickupTime(e.target.value); clearError("pickupTime"); }} className={`${inputClass} pl-11`} />
+                        </div>
+                        {errors.pickupTime && <p className="text-destructive text-xs mt-1">{errors.pickupTime}</p>}
+                      </div>
+                      {tripType === "package_tour" && (
+                        <div>
+                          <label className="text-sm font-semibold mb-2 block">Number of Days</label>
+                          <input type="number" min={1} max={10} value={numDays} onChange={e => setNumDays(Number(e.target.value))} className={inputClass} />
+                        </div>
+                      )}
                     </div>
-                  </div>
 
-                  {/* Vehicle Selection */}
-                  <div>
-                    <label className="text-sm font-semibold mb-3 block">Select Vehicle <span className="text-destructive">*</span></label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {VEHICLE_OPTIONS.map(v => {
-                        const price = distanceKm > 0 ? distanceKm * v.rate : 0;
-                        return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="text-sm font-semibold mb-2 block">Passengers</label>
+                        <div className="flex items-center gap-3">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <input type="range" min={1} max={20} value={passengers} onChange={e => setPassengers(Number(e.target.value))} className="flex-1 accent-secondary" />
+                          <span className="font-bold text-secondary w-8 text-center">{passengers}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold mb-2 block">Estimated Distance (km)</label>
+                        <input type="number" min={1} value={estimatedDistance} onChange={e => setEstimatedDistance(Number(e.target.value))} className={inputClass} />
+                      </div>
+                    </div>
+
+                    {/* Vehicle Selection */}
+                    <div>
+                      <label className="text-sm font-semibold mb-3 block">Select Vehicle <span className="text-destructive">*</span></label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {vehicles.map(v => (
                           <button
-                            key={v.type}
+                            key={v.id}
                             type="button"
-                            onClick={() => { setVehicleType(v.type); clearError("vehicleType"); }}
+                            onClick={() => { setVehicleType(v.name); clearError("vehicleType"); }}
                             className={`relative p-4 rounded-2xl border-2 text-left transition-all ${
-                              vehicleType === v.type
+                              vehicleType === v.name
                                 ? "border-secondary bg-secondary/5 shadow-md"
                                 : "border-border hover:border-secondary/40"
                             }`}
                           >
-                            <div className="text-2xl mb-2">{v.icon}</div>
-                            <p className="font-bold text-foreground">{v.type}</p>
-                            <p className="text-xs text-muted-foreground">{v.features}</p>
-                            <p className="text-xs text-muted-foreground">{v.seats} seats</p>
-                            <p className="font-bold text-secondary mt-2">₹{v.rate}/km</p>
-                            {price > 0 && (
-                              <p className="text-xs text-accent font-semibold mt-1">≈ ₹{price.toLocaleString()}</p>
-                            )}
-                            {vehicleType === v.type && (
+                            <p className="font-bold text-foreground">{v.name}</p>
+                            <p className="text-xs text-muted-foreground">{v.model_examples}</p>
+                            <p className="text-xs text-muted-foreground">{v.seats} seats • AC</p>
+                            <p className="font-bold text-secondary mt-2">₹{Number(v.price_per_km)}/km</p>
+                            {vehicleType === v.name && (
                               <div className="absolute top-2 right-2">
                                 <CheckCircle className="w-5 h-5 text-secondary" />
                               </div>
                             )}
                           </button>
-                        );
-                      })}
+                        ))}
+                      </div>
+                      {errors.vehicleType && <p className="text-destructive text-xs mt-1">{errors.vehicleType}</p>}
                     </div>
-                    {errors.vehicleType && <p className="text-destructive text-xs mt-1">{errors.vehicleType}</p>}
+
+                    {tripType === "package_tour" && (
+                      <div>
+                        <label className="text-sm font-semibold mb-2 block">Tour Package (optional)</label>
+                        <select value={tourPackage} onChange={e => setTourPackage(e.target.value)} className={selectClass}>
+                          <option value="">Select package</option>
+                          {routes.filter(r => r.trip_type === "package").map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
+                        </select>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="text-sm font-semibold mb-2 block">Special Requests</label>
+                      <textarea value={specialRequests} onChange={e => setSpecialRequests(e.target.value)} rows={2} className={`${inputClass} resize-none`} placeholder="Any special requirements..." />
+                    </div>
+
+                    <button type="button" onClick={handleNext} className="w-full bg-accent text-accent-foreground py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-accent/20 hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                      Continue <ArrowRight className="w-5 h-5" />
+                    </button>
                   </div>
 
-                  {/* Live fare estimate */}
-                  {estimatedFare > 0 && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="bg-secondary/5 border-2 border-secondary/20 rounded-2xl p-5 text-center">
-                      <p className="text-sm text-muted-foreground">Estimated Fare ({distanceKm} km)</p>
-                      <p className="text-3xl font-extrabold text-secondary mt-1">₹{estimatedFare.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground mt-2">Final fare may vary based on tolls, parking & waiting charges.</p>
-                    </motion.div>
-                  )}
-
-                  <button type="button" onClick={handleNext} className="w-full bg-accent text-accent-foreground py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-accent/20 hover:shadow-xl hover:-translate-y-0.5 transition-all">
-                    Continue <ArrowRight className="w-5 h-5" />
-                  </button>
+                  {/* Fare Estimator Card */}
+                  <div className="lg:col-span-2">
+                    <div className="bg-card rounded-3xl p-6 shadow-elevated sticky top-28">
+                      <h4 className="font-bold text-foreground mb-4">Fare Estimate</h4>
+                      {fareCalc ? (
+                        <div className="space-y-3 text-sm">
+                          <div className="flex justify-between"><span className="text-muted-foreground">Distance</span><span className="font-semibold">{estimatedDistance} km</span></div>
+                          {tripType === "round_trip" && <div className="flex justify-between"><span className="text-muted-foreground">Round trip</span><span className="font-semibold">{effectiveDistance} km</span></div>}
+                          <div className="flex justify-between"><span className="text-muted-foreground">Min billable</span><span className="font-semibold">{fareCalc.minKm} km ({numDays} day × 300)</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Billable distance</span><span className="font-bold">{fareCalc.billableDistance} km</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Vehicle rate</span><span className="font-semibold">₹{Number(selectedVehicle?.price_per_km)}/km</span></div>
+                          <div className="border-t border-border pt-3" />
+                          <div className="flex justify-between"><span className="text-muted-foreground">Base Fare</span><span className="font-semibold">₹{fareCalc.baseFare.toLocaleString()}</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Driver Allowance</span><span className="font-semibold">₹{fareCalc.driverAllowance.toLocaleString()}</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Toll & Parking</span><span className="font-semibold text-accent">Extra at actuals</span></div>
+                          <div className="border-t border-border pt-3" />
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-secondary text-base">TOTAL ESTIMATE</span>
+                            <span className="text-2xl font-extrabold text-secondary">₹{fareCalc.totalPrice.toLocaleString()}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">* Final fare may vary based on actual distance and tolls.</p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Select destination and vehicle to see fare estimate.</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-4 p-3 bg-muted rounded-xl">{PRICING_NOTE}</p>
+                    </div>
+                  </div>
                 </motion.div>
               )}
 
@@ -292,21 +382,16 @@ const Booking = () => {
                       {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone}</p>}
                     </div>
                     <div>
-                      <label className="text-sm font-semibold mb-2 block">Email <span className="text-destructive">*</span></label>
+                      <label className="text-sm font-semibold mb-2 block">Email (optional)</label>
                       <div className="relative">
                         <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input type="email" value={email} onChange={e => { setEmail(e.target.value); clearError("email"); }} className={`${inputClass} pl-11`} placeholder="your@email.com" />
+                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} className={`${inputClass} pl-11`} placeholder="your@email.com" />
                       </div>
-                      {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
                     </div>
                     <div>
                       <label className="text-sm font-semibold mb-2 block">Pickup Address <span className="text-destructive">*</span></label>
                       <textarea value={pickupAddress} onChange={e => { setPickupAddress(e.target.value); clearError("pickupAddress"); }} rows={2} className={`${inputClass} resize-none`} placeholder="Full pickup address..." />
                       {errors.pickupAddress && <p className="text-destructive text-xs mt-1">{errors.pickupAddress}</p>}
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold mb-2 block">Special Requests</label>
-                      <textarea value={specialRequests} onChange={e => setSpecialRequests(e.target.value)} rows={2} className={`${inputClass} resize-none`} placeholder="Any special requirements..." />
                     </div>
 
                     <div className="flex gap-3 pt-2">
@@ -325,10 +410,12 @@ const Booking = () => {
                       <h4 className="font-bold text-foreground mb-4">Booking Summary</h4>
                       <div className="space-y-3 text-sm">
                         {[
-                          ["Route", `${fromCity} → ${toCity}`],
-                          ["Distance", distanceKm > 0 ? `${distanceKm} km` : "—"],
+                          ["Trip Type", tripType.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())],
+                          ["Route", `${pickup} → ${destination}`],
+                          ["Distance", estimatedDistance > 0 ? `${estimatedDistance} km` : "—"],
                           ["Date", travelDate || "—"],
-                          ...(travelTime ? [["Time", travelTime]] : []),
+                          ["Time", pickupTime || "—"],
+                          ["Days", String(numDays)],
                           ["Vehicle", vehicleType || "—"],
                           ["Passengers", String(passengers)],
                         ].map(([l, v]) => (
@@ -338,11 +425,14 @@ const Booking = () => {
                           </div>
                         ))}
                       </div>
-                      {estimatedFare > 0 && (
-                        <div className="mt-4 pt-4 border-t border-border">
-                          <div className="flex justify-between items-center">
-                            <span className="font-semibold text-secondary">Total Fare</span>
-                            <span className="text-2xl font-extrabold text-secondary">₹{estimatedFare.toLocaleString()}</span>
+                      {fareCalc && (
+                        <div className="mt-4 pt-4 border-t border-border space-y-2 text-sm">
+                          <div className="flex justify-between"><span className="text-muted-foreground">Base Fare</span><span className="font-semibold">₹{fareCalc.baseFare.toLocaleString()}</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Driver Allowance</span><span className="font-semibold">₹{fareCalc.driverAllowance.toLocaleString()}</span></div>
+                          <div className="flex justify-between"><span className="text-muted-foreground">Toll & Parking</span><span className="text-accent font-semibold">Extra</span></div>
+                          <div className="flex justify-between items-center pt-2 border-t border-border">
+                            <span className="font-semibold text-secondary">Total</span>
+                            <span className="text-2xl font-extrabold text-secondary">₹{fareCalc.totalPrice.toLocaleString()}</span>
                           </div>
                         </div>
                       )}
@@ -358,30 +448,45 @@ const Booking = () => {
                     <CheckCircle className="w-12 h-12 text-[#25D366]" />
                   </motion.div>
                   <h3 className="text-3xl font-extrabold text-foreground">Booking Confirmed!</h3>
-                  <p className="text-muted-foreground mt-3">Your booking reference ID:</p>
+                  <p className="text-muted-foreground mt-3">Your booking reference:</p>
                   <div className="mt-3 inline-flex items-center gap-2 bg-secondary/10 text-secondary px-6 py-3 rounded-2xl">
                     <Sparkles className="w-5 h-5" />
-                    <span className="text-2xl font-extrabold tracking-wider">{bookingId}</span>
+                    <span className="text-2xl font-extrabold tracking-wider">#{bookingRef}</span>
                   </div>
 
                   <div className="bg-muted/50 rounded-2xl p-5 mt-6 text-left space-y-2 text-sm">
-                    <div className="flex justify-between"><span className="text-muted-foreground">Route</span><span className="font-semibold">{fromCity} → {toCity}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Route</span><span className="font-semibold">{pickup} → {destination}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span className="font-semibold">{travelDate}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Vehicle</span><span className="font-semibold">{vehicleType}</span></div>
-                    {estimatedFare > 0 && <div className="flex justify-between pt-2 border-t border-border"><span className="font-semibold text-secondary">Total</span><span className="font-extrabold text-secondary text-lg">₹{estimatedFare.toLocaleString()}</span></div>}
+                    <div className="flex justify-between"><span className="text-muted-foreground">Passengers</span><span className="font-semibold">{passengers}</span></div>
+                    {fareCalc && (
+                      <>
+                        <div className="border-t border-border pt-2" />
+                        <div className="flex justify-between"><span className="text-muted-foreground">Base Fare</span><span className="font-semibold">₹{fareCalc.baseFare.toLocaleString()}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">Driver Allowance</span><span className="font-semibold">₹{fareCalc.driverAllowance.toLocaleString()}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">Toll & Parking</span><span className="text-accent font-semibold">Extra at actuals</span></div>
+                        <div className="flex justify-between pt-2 border-t border-border"><span className="font-semibold text-secondary">Total Estimate</span><span className="font-extrabold text-secondary text-lg">₹{fareCalc.totalPrice.toLocaleString()}</span></div>
+                      </>
+                    )}
                   </div>
 
                   <p className="text-muted-foreground mt-6 text-base leading-relaxed">
-                    Our team will call you within <strong>30 minutes</strong> to confirm your booking.
+                    Our team will call you on <strong>+91 {PHONE.replace(/(\d{5})(\d{5})/, "$1 $2")}</strong> within <strong>30 minutes</strong> to confirm your booking.
                   </p>
+                  <p className="text-xs text-muted-foreground mt-2">Note: Toll and parking charges will be extra at actuals.</p>
 
                   <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
                     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all text-lg">
-                      <MessageCircle className="w-6 h-6" /> Chat on WhatsApp
+                      <MessageCircle className="w-6 h-6" /> Send Booking on WhatsApp
                     </a>
-                    <Link to="/booking" onClick={() => window.location.reload()} className="bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center mt-3">
+                    <Link to="/booking" onClick={() => window.location.reload()} className="bg-primary text-primary-foreground px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
                       Book Another Trip
                     </Link>
+                    <a href={PHONE_LINK} className="border-2 border-border px-8 py-3 rounded-2xl font-bold hover:bg-muted transition-colors flex items-center justify-center gap-2">
+                      <Phone className="w-4 h-4" /> Call Us: +91 {PHONE.replace(/(\d{5})(\d{5})/, "$1 $2")}
+                    </a>
                   </div>
                 </motion.div>
               )}
