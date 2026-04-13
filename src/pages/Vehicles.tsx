@@ -4,8 +4,6 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import VehicleFleet from "@/components/home/VehicleFleet";
 import FareEstimator from "@/components/FareEstimator";
 import CTABanner from "@/components/home/CTABanner";
-import { PRICING_NOTE } from "@/lib/constants";
-import SectionHeading from "@/components/SectionHeading";
 
 const Vehicles = () => (
   <>
