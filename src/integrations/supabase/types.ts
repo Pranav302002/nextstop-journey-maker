@@ -34,6 +34,7 @@ export type Database = {
           pickup_time: string
           price_per_km: number | null
           return_date: string | null
+          secret_token: string | null
           source: string | null
           special_requests: string | null
           status: string
@@ -63,6 +64,7 @@ export type Database = {
           pickup_time: string
           price_per_km?: number | null
           return_date?: string | null
+          secret_token?: string | null
           source?: string | null
           special_requests?: string | null
           status?: string
@@ -92,6 +94,7 @@ export type Database = {
           pickup_time?: string
           price_per_km?: number | null
           return_date?: string | null
+          secret_token?: string | null
           source?: string | null
           special_requests?: string | null
           status?: string
