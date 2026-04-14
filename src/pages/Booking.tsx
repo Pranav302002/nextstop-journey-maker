@@ -121,6 +121,7 @@ const Booking = () => {
     setLoading(true);
     try {
       const ref = `NS${Date.now().toString(36).toUpperCase()}`;
+      const token = crypto.randomUUID();
       const billableDistance = fareCalc?.billableDistance || 0;
       const baseFare = fareCalc?.baseFare || 0;
       const driverAllowance = fareCalc?.driverAllowance || 0;
@@ -128,6 +129,7 @@ const Booking = () => {
 
       const { data, error } = await supabase.from("bookings").insert({
         booking_ref: ref,
+        secret_token: token,
         customer_name: name.trim(),
         customer_phone: phone.trim(),
         customer_email: email.trim() || null,

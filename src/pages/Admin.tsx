@@ -1,49 +1,68 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Lock, RefreshCw, Phone, Filter, MessageCircle, Mail, Search } from "lucide-react";
+import { Lock, RefreshCw, Phone, Filter, MessageCircle, Mail, Search, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PHONE, PHONE2, EMAIL } from "@/lib/constants";
 
-const ADMIN_PASSWORD = "NextStop@2003";
-
 const Admin = () => {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [attempts, setAttempts] = useState(0);
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
   const [bookings, setBookings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Listen for auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (attempts >= 3) {
-      setError("Too many attempts. Please try again later.");
-      return;
+    setLoginLoading(true);
+    setLoginError("");
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password: loginPassword,
+    });
+    if (error) {
+      setLoginError(error.message);
     }
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-      setError("");
-    } else {
-      setAttempts(a => a + 1);
-      setError(`Incorrect password (${3 - attempts - 1} attempts remaining)`);
-    }
+    setLoginLoading(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
   };
 
   const fetchBookings = useCallback(async () => {
-    setLoading(true);
+    setFetching(true);
     const { data } = await supabase.from("bookings").select("*").order("created_at", { ascending: false });
     if (data) setBookings(data);
-    setLoading(false);
+    setFetching(false);
   }, []);
 
   useEffect(() => {
-    if (!authenticated) return;
+    if (!session) return;
     fetchBookings();
     const interval = setInterval(fetchBookings, 30000);
     return () => clearInterval(interval);
-  }, [authenticated, fetchBookings]);
+  }, [session, fetchBookings]);
 
   const updateStatus = async (id: string, status: string) => {
     await supabase.from("bookings").update({ status }).eq("id", id);
@@ -67,7 +86,15 @@ const Admin = () => {
   const totalRevenue = bookings.filter(b => b.payment_status === "paid").reduce((sum, b) => sum + (Number(b.total_price) || 0), 0);
   const pendingCount = bookings.filter(b => b.status === "pending").length;
 
-  if (!authenticated) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!session) {
     return (
       <>
         <meta name="robots" content="noindex, nofollow" />
@@ -77,9 +104,12 @@ const Admin = () => {
               <Lock className="w-7 h-7 text-primary" />
             </div>
             <h1 className="text-xl font-bold text-center mb-6">Admin Login</h1>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" className="w-full px-4 py-3 border-2 border-border rounded-xl text-sm bg-background focus:outline-none focus:border-primary mb-3" disabled={attempts >= 3} />
-            {error && <p className="text-destructive text-sm mb-3">{error}</p>}
-            <button type="submit" disabled={attempts >= 3} className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-bold disabled:opacity-50">Login</button>
+            <input type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="Admin email" className="w-full px-4 py-3 border-2 border-border rounded-xl text-sm bg-background focus:outline-none focus:border-primary mb-3" autoComplete="email" />
+            <input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="Password" className="w-full px-4 py-3 border-2 border-border rounded-xl text-sm bg-background focus:outline-none focus:border-primary mb-3" autoComplete="current-password" />
+            {loginError && <p className="text-destructive text-sm mb-3">{loginError}</p>}
+            <button type="submit" disabled={loginLoading} className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-bold disabled:opacity-50">
+              {loginLoading ? "Signing in..." : "Login"}
+            </button>
           </motion.form>
         </div>
       </>
@@ -96,7 +126,10 @@ const Admin = () => {
             <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> +91 {PHONE2}</span>
             <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {EMAIL}</span>
             <button onClick={fetchBookings} className="flex items-center gap-1 bg-primary-foreground/10 px-3 py-1.5 rounded-lg hover:bg-primary-foreground/20 transition-colors">
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+              <RefreshCw className={`w-4 h-4 ${fetching ? "animate-spin" : ""}`} /> Refresh
+            </button>
+            <button onClick={handleLogout} className="flex items-center gap-1 bg-primary-foreground/10 px-3 py-1.5 rounded-lg hover:bg-primary-foreground/20 transition-colors">
+              <LogOut className="w-4 h-4" /> Logout
             </button>
           </div>
         </div>
@@ -142,7 +175,7 @@ const Admin = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
-                {["Ref", "Name", "Phone", "Pickup", "Dest.", "Date", "Vehicle", "Days", "Dist.", "Base", "Driver", "Total", "Status", "Actions"].map(h => (
+                {["Ref", "Name", "Phone", "Email", "Pickup", "Dest.", "Date", "Vehicle", "Days", "Dist.", "Base", "Driver", "Total", "Status", "Actions"].map(h => (
                   <th key={h} className="text-left p-3 font-semibold text-muted-foreground whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -153,6 +186,7 @@ const Admin = () => {
                   <td className="p-3 font-mono text-xs">{b.booking_ref || b.id.substring(0, 8)}</td>
                   <td className="p-3 font-medium whitespace-nowrap">{b.customer_name}</td>
                   <td className="p-3 whitespace-nowrap">{b.customer_phone}</td>
+                  <td className="p-3 whitespace-nowrap text-xs">{b.customer_email || "—"}</td>
                   <td className="p-3 whitespace-nowrap">{b.pickup_location}</td>
                   <td className="p-3 whitespace-nowrap">{b.destination}</td>
                   <td className="p-3 whitespace-nowrap">{b.travel_date}</td>
@@ -186,7 +220,7 @@ const Admin = () => {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={14} className="p-8 text-center text-muted-foreground">No bookings found</td></tr>
+                <tr><td colSpan={15} className="p-8 text-center text-muted-foreground">No bookings found</td></tr>
               )}
             </tbody>
           </table>
