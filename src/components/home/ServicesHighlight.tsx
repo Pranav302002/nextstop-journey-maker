@@ -11,7 +11,7 @@ const services = [
   { icon: Church, title: "Religious Tours", desc: "Jyotirlinga, Shirdi, Shani Shingnapur" },
   { icon: UsersIcon, title: "Group Tours", desc: "Tempo and Urbania for large groups" },
   { icon: Calendar, title: "Custom Packages", desc: "Tailored itineraries on request" },
-  { icon: CarIcon, title: "Mumbai-Pune Transfers", desc: "Regular intercity routes" },
+  { icon: CarIcon, title: "Intercity Transfers", desc: "Mumbai, Pune & other regular routes" },
 ];
 
 const ServicesHighlight = () => (

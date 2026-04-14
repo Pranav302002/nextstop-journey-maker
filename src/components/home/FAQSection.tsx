@@ -5,7 +5,7 @@ import SectionHeading from "@/components/SectionHeading";
 
 const faqs = [
   { q: "How do I book a trip?", a: "You can book through our website booking form, call us directly, or send a WhatsApp message. Our team will confirm your booking within minutes." },
-  { q: "Do you provide airport pickup and drop?", a: "Yes! We offer airport pickup and drop services for Pune and Mumbai airports with on-time guarantee." },
+  { q: "Do you provide airport pickup and drop?", a: "Yes! We offer airport pickup and drop services for Aurangabad (Chhatrapati Sambhajinagar) Airport with on-time guarantee." },
   { q: "Can I book round trip services?", a: "Absolutely! We offer one-way, round trip, and multi-day package tours. Choose what suits your travel plan best." },
   { q: "Are drivers experienced and verified?", a: "All our drivers are professionally trained, background-verified, and experienced with long-distance routes across Maharashtra." },
   { q: "Do you offer group booking vehicles?", a: "Yes, we have Tempo Travellers (12-17 seats) and Urbania luxury buses for group travel, corporate events, and weddings." },
