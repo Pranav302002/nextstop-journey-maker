@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Users, ArrowRight, Star, Snowflake } from "lucide-react";
 import SectionHeading from "@/components/SectionHeading";
 import { WHATSAPP_PREFILLED, PRICING_NOTE } from "@/lib/constants";
-import { supabase } from "@/integrations/supabase/client";
+import { getCachedVehiclesAndRoutes } from "@/lib/cache";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import vehicleSedan from "@/assets/vehicle-sedan.jpg";
 import vehicleErtiga from "@/assets/vehicle-ertiga.jpg";
@@ -31,8 +31,8 @@ const VehicleFleet = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.from("vehicles").select("*").eq("is_active", true).order("price_per_km").then(({ data }) => {
-      if (data) setVehicles(data);
+    getCachedVehiclesAndRoutes().then(({ vehicles: v }) => {
+      setVehicles(v);
       setLoading(false);
     });
   }, []);
@@ -43,18 +43,24 @@ const VehicleFleet = () => {
         <SectionHeading title="Our Vehicle Fleet" subtitle="Choose from our range of well-maintained, comfortable vehicles for every type of journey." />
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1,2,3,4].map(i => <div key={i} className="bg-card rounded-2xl h-80 animate-pulse" />)}
+            {[1,2,3,4].map(i => (
+              <div key={i} className="bg-card rounded-2xl overflow-hidden">
+                <Skeleton className="h-44 w-full rounded-none" />
+                <div className="p-5 space-y-3">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-8 w-1/3" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {vehicles.map((v, i) => (
-              <motion.div
+            {vehicles.map((v) => (
+              <div
                 key={v.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 group relative"
+                className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300 group relative"
               >
                 {popularVehicles.includes(v.name) && (
                   <div className="absolute top-3 right-3 z-10 bg-accent text-accent-foreground text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
@@ -68,7 +74,9 @@ const VehicleFleet = () => {
                     loading="lazy"
                     width={800}
                     height={600}
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    style={{ willChange: "transform" }}
                   />
                 </div>
                 <div className="p-5">
@@ -92,7 +100,7 @@ const VehicleFleet = () => {
                     </a>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
