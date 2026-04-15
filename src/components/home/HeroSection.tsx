@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { MapPin, ArrowRight, Phone, Star, Shield, Clock, Users, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 import { PHONE_LINK, WHATSAPP_PREFILLED, DEFAULT_WHATSAPP_MSG, calcFare } from "@/lib/constants";
-import { getCachedVehiclesAndRoutes } from "@/lib/cache";
+import { supabase } from "@/integrations/supabase/client";
 
 const trustBadges = [
   { icon: Users, label: "5000+ Happy Customers" },
@@ -24,10 +25,8 @@ const HeroSection = () => {
   const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
-    getCachedVehiclesAndRoutes().then(({ vehicles: v, routes: r }) => {
-      setRoutes(r);
-      setVehicles(v);
-    });
+    supabase.from("routes").select("*").eq("is_active", true).then(({ data }) => { if (data) setRoutes(data); });
+    supabase.from("vehicles").select("*").eq("is_active", true).order("price_per_km").then(({ data }) => { if (data) setVehicles(data); });
   }, []);
 
   const matchedRoute = routes.find(r => r.to_city === destination || r.name === destination);
@@ -50,28 +49,18 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <img
-        src={heroBg}
-        alt="Ajanta Caves Heritage"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ transform: "scale(1.05)", willChange: "transform" }}
-        width={1920}
-        height={1080}
-        loading="eager"
-        fetchPriority="high"
-        decoding="async"
-      />
+      <img src={heroBg} alt="Ajanta Caves Heritage" className="absolute inset-0 w-full h-full object-cover scale-105" width={1920} height={1080} />
       <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-primary/50 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent" />
 
       <div className="relative z-10 container mx-auto px-4 py-32 md:py-0">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center animate-[fadeUp_0.8s_ease-out]">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="text-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-card leading-[1.1] tracking-tight">
               Explore Every Journey{" "}
               <span className="relative inline-block">
                 <span className="text-accent">with NextStop</span>
-                <span className="absolute -bottom-2 left-0 h-1.5 bg-accent/60 rounded-full animate-[expandWidth_0.8s_ease-out_1s_forwards]" style={{ width: 0 }} />
+                <motion.span initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ delay: 1, duration: 0.8 }} className="absolute -bottom-2 left-0 h-1.5 bg-accent/60 rounded-full" />
               </span>
             </h1>
             <p className="mt-6 text-card/85 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light">
@@ -91,12 +80,15 @@ const HeroSection = () => {
                 Explore Packages <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Quick Booking Widget */}
-          <form
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
             onSubmit={handleQuote}
-            className="mt-10 bg-card/10 backdrop-blur-lg border border-card/20 rounded-2xl p-4 md:p-6 max-w-4xl mx-auto animate-[fadeUp_0.8s_ease-out_0.4s_both]"
+            className="mt-10 bg-card/10 backdrop-blur-lg border border-card/20 rounded-2xl p-4 md:p-6 max-w-4xl mx-auto"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
               <select value={destination} onChange={e => setDestination(e.target.value)} className="px-3 py-3 rounded-xl bg-card text-foreground text-sm font-medium appearance-none cursor-pointer lg:col-span-2">
@@ -120,17 +112,17 @@ const HeroSection = () => {
                 <p className="text-card/70 text-xs mt-1">* Min 300 km/day. Toll, parking & driver allowance extra.</p>
               </div>
             )}
-          </form>
+          </motion.form>
 
           {/* Trust Badges */}
-          <div className="mt-8 flex flex-wrap justify-center gap-3 md:gap-4 animate-[fadeUp_0.8s_ease-out_0.8s_both]">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="mt-8 flex flex-wrap justify-center gap-3 md:gap-4">
             {trustBadges.map(b => (
               <div key={b.label} className="flex items-center gap-2 bg-card/10 backdrop-blur-sm px-4 py-2 rounded-full text-card text-sm font-medium">
                 <b.icon className="w-4 h-4 text-accent" />
                 {b.label}
               </div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

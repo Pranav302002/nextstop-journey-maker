@@ -3,19 +3,16 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import HeroSection from "@/components/home/HeroSection";
 import HowItWorks from "@/components/home/HowItWorks";
+import PackagesGrid from "@/components/home/PackagesGrid";
+import VehicleFleet from "@/components/home/VehicleFleet";
+import WhyChooseUs from "@/components/home/WhyChooseUs";
+import StatsCounters from "@/components/home/StatsCounters";
 import ServicesHighlight from "@/components/home/ServicesHighlight";
+import TestimonialsSection from "@/components/home/TestimonialsSection";
+import FAQSection from "@/components/home/FAQSection";
+import CTABanner from "@/components/home/CTABanner";
 import PricingSection from "@/components/home/PricingSection";
-import LazySection from "@/components/LazySection";
-import { lazy, Suspense } from "react";
-
-const PackagesGrid = lazy(() => import("@/components/home/PackagesGrid"));
-const VehicleFleet = lazy(() => import("@/components/home/VehicleFleet"));
-const WhyChooseUs = lazy(() => import("@/components/home/WhyChooseUs"));
-const StatsCounters = lazy(() => import("@/components/home/StatsCounters"));
-const TestimonialsSection = lazy(() => import("@/components/home/TestimonialsSection"));
-const FAQSection = lazy(() => import("@/components/home/FAQSection"));
-const CTABanner = lazy(() => import("@/components/home/CTABanner"));
-const GoogleMap = lazy(() => import("@/components/home/GoogleMap"));
+import GoogleMap from "@/components/home/GoogleMap";
 
 const Index = () => (
   <>
@@ -25,30 +22,14 @@ const Index = () => (
       <HowItWorks />
       <ServicesHighlight />
       <PricingSection />
-      <LazySection height="h-96">
-        <Suspense fallback={null}><PackagesGrid limit={6} /></Suspense>
-      </LazySection>
-      <LazySection height="h-96">
-        <Suspense fallback={null}><VehicleFleet /></Suspense>
-      </LazySection>
-      <LazySection height="h-64">
-        <Suspense fallback={null}><WhyChooseUs /></Suspense>
-      </LazySection>
-      <LazySection height="h-48">
-        <Suspense fallback={null}><StatsCounters /></Suspense>
-      </LazySection>
-      <LazySection height="h-64">
-        <Suspense fallback={null}><TestimonialsSection /></Suspense>
-      </LazySection>
-      <LazySection height="h-80">
-        <Suspense fallback={null}><GoogleMap /></Suspense>
-      </LazySection>
-      <LazySection height="h-64">
-        <Suspense fallback={null}><FAQSection /></Suspense>
-      </LazySection>
-      <LazySection height="h-64">
-        <Suspense fallback={null}><CTABanner /></Suspense>
-      </LazySection>
+      <PackagesGrid limit={6} />
+      <VehicleFleet />
+      <WhyChooseUs />
+      <StatsCounters />
+      <TestimonialsSection />
+      <GoogleMap />
+      <FAQSection />
+      <CTABanner />
     </main>
     <Footer />
     <WhatsAppButton />

@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
+// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -17,20 +18,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom"],
-          supabase: ["@supabase/supabase-js"],
-          ui: ["framer-motion", "lucide-react"],
-        },
-        chunkFileNames: "assets/[name]-[hash].js",
-        entryFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash].[ext]",
-      },
-    },
-    chunkSizeWarningLimit: 600,
   },
 }));
