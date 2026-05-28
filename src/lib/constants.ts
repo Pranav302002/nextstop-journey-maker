@@ -10,8 +10,15 @@ export const WHATSAPP_PREFILLED = (msg: string) =>
 export const DEFAULT_WHATSAPP_MSG = "Hello NextStop Tours and Travels, I would like to book a trip from Chhatrapati Sambhajinagar. Please share details.";
 
 export const BUSINESS_NAME = "NextStop Tours and Travels";
-export const LOCATION = "Chhatrapati Sambhajinagar (Aurangabad), Maharashtra - 431001";
+export const LOCATION = "N2, Galli No.1, Ambika Nagar, CIDCO, Chhatrapati Sambhajinagar, Maharashtra - 431003";
 export const TAGLINE = "Your trusted travel partner from Chhatrapati Sambhajinagar";
+
+// Google Business Profile links
+export const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/7zFpZYtjxSk1q6t19";
+export const GOOGLE_MAPS_EMBED_URL =
+  "https://maps.google.com/maps?q=NextStop+Tours+%26+Travels+Ambika+Nagar+CIDCO+Chhatrapati+Sambhajinagar&output=embed";
+// Opens the listing; user can tap "Write a review" from there.
+export const GOOGLE_REVIEW_URL = "https://maps.app.goo.gl/7zFpZYtjxSk1q6t19";
 
 export const MIN_KM_PER_DAY = 300;
 export const DRIVER_ALLOWANCE_OUTSTATION = 300;
