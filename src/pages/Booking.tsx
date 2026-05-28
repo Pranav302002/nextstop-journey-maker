@@ -127,7 +127,7 @@ const Booking = () => {
       const driverAllowance = fareCalc?.driverAllowance || 0;
       const totalPrice = fareCalc?.totalPrice || 0;
 
-      const { data, error } = await supabase.from("bookings").insert({
+      const { error } = await supabase.from("bookings").insert({
         booking_ref: ref,
         secret_token: token,
         customer_name: name.trim(),
@@ -154,10 +154,10 @@ const Booking = () => {
         status: "pending",
         payment_status: "unpaid",
         source: "website",
-      }).select("booking_ref").single();
+      });
 
       if (error) throw error;
-      setBookingRef(data.booking_ref || ref);
+      setBookingRef(ref);
       setStep(2);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
