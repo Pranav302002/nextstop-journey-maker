@@ -73,7 +73,7 @@ const Contact = () => {
 
               <div className="bg-card rounded-2xl overflow-hidden shadow-card h-64">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d120617.74578901057!2d75.24165825!3d19.8761653!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bdb98f0a8e3cb57%3A0x5e7b7d2f90cd47d1!2sChhatrapati%20Sambhajinagar%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1699000000000"
+                  src="https://maps.google.com/maps?q=NextStop+Tours+%26+Travels+Ambika+Nagar+CIDCO+Chhatrapati+Sambhajinagar&output=embed"
                   width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" title="Location Map"
                 />
               </div>
