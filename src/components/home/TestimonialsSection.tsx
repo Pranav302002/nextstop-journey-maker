@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import SectionHeading from "@/components/SectionHeading";
 import { supabase } from "@/integrations/supabase/client";
+import { GOOGLE_MAPS_URL, GOOGLE_REVIEW_URL } from "@/lib/constants";
 
 const TestimonialsSection = () => {
   const [testimonials, setTestimonials] = useState<any[]>([]);
@@ -63,6 +64,24 @@ const TestimonialsSection = () => {
               <ChevronRight className="w-5 h-5 text-foreground" />
             </button>
           </div>
+        </div>
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href={GOOGLE_MAPS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-card border border-border px-5 py-2.5 rounded-lg font-semibold text-sm text-foreground hover:bg-muted transition-colors"
+          >
+            <Star className="w-4 h-4 text-accent fill-accent" /> Read Reviews on Google
+          </a>
+          <a
+            href={GOOGLE_REVIEW_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-accent/90 transition-colors"
+          >
+            <Star className="w-4 h-4" /> Leave a Review
+          </a>
         </div>
       </div>
     </section>
